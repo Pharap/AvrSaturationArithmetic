@@ -11,12 +11,11 @@ SatU8 & SatU8::operator++(void)
 {
 	asm volatile
 	(
+		// if(result == 255) goto end;
+		"CPI %A[result], 255 \n"
+		"BREQ end%= \n"
 		// ++result;
-		"INC %A[result] \n"
-		// if(sreg.z == 0) goto end;
-		"BRNE end%= \n"
-		// else result = 0xFF;
-		"SBR %A[result], 0xFF \n" 
+		"INC %A[result] \n" 
 		"end%=: \n"
 		:
 		[result] "+r" (this->value)
@@ -27,13 +26,12 @@ SatU8 & SatU8::operator++(void)
 SatU8 & SatU8::operator--(void)
 {
 	asm volatile
-	(
+	(		
+		// if(result == 0) goto end;
+		"TST %A[result] \n"
+		"BREQ end%= \n"
 		// --result;
-		"SBCI %A[result], 1 \n"
-		// if(sreg.c == 0) goto end;
-		"BRCC end%= \n"
-		// else result = 0;
-		"CLR %A[result] \n"
+		"DEC %A[result] \n"
 		"end%=: \n"
 		:
 		[result] "+r" (this->value)
